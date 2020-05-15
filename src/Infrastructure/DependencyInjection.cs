@@ -29,7 +29,7 @@ namespace MedTechApp.Infrastructure
 
             services.AddScoped<IApplicationDbContext>(provider => provider.GetService<ApplicationDbContext>());
 
-                services.AddDefaultIdentity<ApplicationUser>()
+            services.AddDefaultIdentity<ApplicationUser>()
                     .AddEntityFrameworkStores<ApplicationDbContext>();
             
             services.AddIdentityServer()
