@@ -1,4 +1,4 @@
-<ul class="navbar-nav" *ngIf="isAuthenticated | async">
+<!--<ul class="navbar-nav" *ngIf="isAuthenticated | async">
     <li class="nav-item">
         <a  class="nav-link text-dark" [routerLink]='["/authentication/profile"]' title="Manage">Hello {{ userName | async }}</a>
     </li>
@@ -8,9 +8,17 @@
 </ul>
 <ul class="navbar-nav" *ngIf="!(isAuthenticated | async)">
   <li class="nav-item">
-        <a class="nav-link text-dark" [routerLink]='["/authentication/register"]'>Register</a>
-    </li>
+    <a mat-button [routerLink]="'/contacts'"> Contacts </a>
+    <a class="nav-link text-dark" [routerLink]='["/authentication/register"]'>Register</a>
+  </li>
     <li class="nav-item">
         <a class="nav-link text-dark" [routerLink]='["/authentication/login"]'>Login</a>
     </li>
-</ul>
+</ul>-->
+
+  <div class="navbar-nav" *ngIf="isAuthenticated | async">
+    <a class="nav-link text-dark" [routerLink]='["/authentication/logout"]' [state]='{ local: true }' title="Logout">Logout</a>
+  </div>
+<div class="navbar-nav" *ngIf="!(isAuthenticated | async)">
+  <button [routerLink]='["/authentication/login"]'>Login</button>
+</div>
