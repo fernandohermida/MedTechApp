@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { WeatherForecastClient, WeatherForecast } from "../medtechapp-api";
+import { WeatherForecastClient, WeatherForecast } from "../../medtechapp-api";
 
 @Component({
   selector: 'app-fetch-data',
