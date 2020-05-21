@@ -15,7 +15,7 @@ export class NavbarComponent {
     { Label: 'Table', Target: '/table' },
     { Label: 'Counter', Target: '/counter' },
     { Label: 'Fetch data', Target: '/fetch-data' },
-    { Label: 'Todo', Target: '/todo' }
+    { Label: 'Tasks', Target: '/todo' }
     ] as NavMenuItem[];
 
   isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset)
