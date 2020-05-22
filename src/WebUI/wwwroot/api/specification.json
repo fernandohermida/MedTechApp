@@ -6,6 +6,44 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/api/Patients": {
+      "post": {
+        "tags": [
+          "Patients"
+        ],
+        "operationId": "Patients_Create",
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePatientCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
     "/api/TodoItems": {
       "post": {
         "tags": [
@@ -388,6 +426,20 @@
   },
   "components": {
     "schemas": {
+      "CreatePatientCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastName": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "CreateTodoItemCommand": {
         "type": "object",
         "additionalProperties": false,

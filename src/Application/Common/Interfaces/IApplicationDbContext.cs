@@ -11,6 +11,8 @@ namespace MedTechApp.Application.Common.Interfaces
 
         DbSet<TodoItem> TodoItems { get; set; }
 
+        DbSet<Patient> Patients { get; set; }
+
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
     }
 }
