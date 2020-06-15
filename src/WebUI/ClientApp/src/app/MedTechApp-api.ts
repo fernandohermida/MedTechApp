@@ -16,6 +16,7 @@ export const API_BASE_URL = new InjectionToken<string>('API_BASE_URL');
 
 export interface IPatientsClient {
     create(command: CreatePatientCommand): Observable<number>;
+    get(): Observable<PatientsVm>;
 }
 
 @Injectable({
@@ -81,6 +82,54 @@ export class PatientsClient implements IPatientsClient {
             }));
         }
         return _observableOf<number>(<any>null);
+    }
+
+    get(): Observable<PatientsVm> {
+        let url_ = this.baseUrl + "/api/Patients";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",			
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGet(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGet(<any>response_);
+                } catch (e) {
+                    return <Observable<PatientsVm>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<PatientsVm>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processGet(response: HttpResponseBase): Observable<PatientsVm> {
+        const status = response.status;
+        const responseBlob = 
+            response instanceof HttpResponse ? response.body : 
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }};
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = PatientsVm.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<PatientsVm>(<any>null);
     }
 }
 
@@ -659,6 +708,10 @@ export class WeatherForecastClient implements IWeatherForecastClient {
 export class CreatePatientCommand implements ICreatePatientCommand {
     firstName?: string | undefined;
     lastName?: string | undefined;
+    address?: string | undefined;
+    birdDate?: Date | undefined;
+    bloodGroup?: BloodType;
+    gender?: GenderType;
 
     constructor(data?: ICreatePatientCommand) {
         if (data) {
@@ -673,6 +726,10 @@ export class CreatePatientCommand implements ICreatePatientCommand {
         if (_data) {
             this.firstName = _data["firstName"];
             this.lastName = _data["lastName"];
+            this.address = _data["address"];
+            this.birdDate = _data["birdDate"] ? new Date(_data["birdDate"].toString()) : <any>undefined;
+            this.bloodGroup = _data["bloodGroup"];
+            this.gender = _data["gender"];
         }
     }
 
@@ -687,6 +744,10 @@ export class CreatePatientCommand implements ICreatePatientCommand {
         data = typeof data === 'object' ? data : {};
         data["firstName"] = this.firstName;
         data["lastName"] = this.lastName;
+        data["address"] = this.address;
+        data["birdDate"] = this.birdDate ? this.birdDate.toISOString() : <any>undefined;
+        data["bloodGroup"] = this.bloodGroup;
+        data["gender"] = this.gender;
         return data; 
     }
 }
@@ -694,6 +755,131 @@ export class CreatePatientCommand implements ICreatePatientCommand {
 export interface ICreatePatientCommand {
     firstName?: string | undefined;
     lastName?: string | undefined;
+    address?: string | undefined;
+    birdDate?: Date | undefined;
+    bloodGroup?: BloodType;
+    gender?: GenderType;
+}
+
+export enum BloodType {
+    ABNegative = 0,
+    ABPositive = 1,
+    ANegative = 2,
+    APositive = 3,
+    BNegative = 4,
+    BPositive = 5,
+    ONegative = 6,
+    OPositive = 7,
+    NotSet = 8,
+}
+
+export enum GenderType {
+    Masculine = 0,
+    Femenine = 1,
+}
+
+export class PatientsVm implements IPatientsVm {
+    patientList?: PatientDto[] | undefined;
+
+    constructor(data?: IPatientsVm) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["patientList"])) {
+                this.patientList = [] as any;
+                for (let item of _data["patientList"])
+                    this.patientList!.push(PatientDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): PatientsVm {
+        data = typeof data === 'object' ? data : {};
+        let result = new PatientsVm();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.patientList)) {
+            data["patientList"] = [];
+            for (let item of this.patientList)
+                data["patientList"].push(item.toJSON());
+        }
+        return data; 
+    }
+}
+
+export interface IPatientsVm {
+    patientList?: PatientDto[] | undefined;
+}
+
+export class PatientDto implements IPatientDto {
+    id?: number;
+    firstName?: string | undefined;
+    lastName?: string | undefined;
+    address?: string | undefined;
+    birdDate?: string | undefined;
+    bloodGroup?: string | undefined;
+    gender?: string | undefined;
+
+    constructor(data?: IPatientDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.firstName = _data["firstName"];
+            this.lastName = _data["lastName"];
+            this.address = _data["address"];
+            this.birdDate = _data["birdDate"];
+            this.bloodGroup = _data["bloodGroup"];
+            this.gender = _data["gender"];
+        }
+    }
+
+    static fromJS(data: any): PatientDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new PatientDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["firstName"] = this.firstName;
+        data["lastName"] = this.lastName;
+        data["address"] = this.address;
+        data["birdDate"] = this.birdDate;
+        data["bloodGroup"] = this.bloodGroup;
+        data["gender"] = this.gender;
+        return data; 
+    }
+}
+
+export interface IPatientDto {
+    id?: number;
+    firstName?: string | undefined;
+    lastName?: string | undefined;
+    address?: string | undefined;
+    birdDate?: string | undefined;
+    bloodGroup?: string | undefined;
+    gender?: string | undefined;
 }
 
 export class CreateTodoItemCommand implements ICreateTodoItemCommand {

@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using MedTechApp.Application.Patients.Commands.CreatePatientCommand;
-
+using MedTechApp.Application.Patients.Commands.CreatePatient;
+using MedTechApp.Application.Patients.Queries.GetPatients;
 
 namespace MedTechApp.WebUI.Controllers
 {
@@ -17,6 +17,12 @@ namespace MedTechApp.WebUI.Controllers
         public async Task<ActionResult<int>> Create(CreatePatientCommand command)
         {
             return await Mediator.Send(command);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<PatientsVm>> Get()
+        {
+            return await Mediator.Send(new GetPatientsQuery());
         }
     }
 }

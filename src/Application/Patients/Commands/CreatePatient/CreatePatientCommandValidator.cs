@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace MedTechApp.Application.Patients.Commands.CreatePatientCommand
+namespace MedTechApp.Application.Patients.Commands.CreatePatient
 {
     class CreatePatientCommandValidator : AbstractValidator<CreatePatientCommand>
     {
