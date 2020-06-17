@@ -14,6 +14,125 @@ import { HttpClient, HttpHeaders, HttpResponse, HttpResponseBase } from '@angula
 
 export const API_BASE_URL = new InjectionToken<string>('API_BASE_URL');
 
+export interface IDoctorsClient {
+    create(command: CreateDoctorCommand): Observable<number>;
+    get(): Observable<DoctorsVm>;
+}
+
+@Injectable({
+    providedIn: 'root'
+})
+export class DoctorsClient implements IDoctorsClient {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl ? baseUrl : "";
+    }
+
+    create(command: CreateDoctorCommand): Observable<number> {
+        let url_ = this.baseUrl + "/api/Doctors";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",			
+            headers: new HttpHeaders({
+                "Content-Type": "application/json", 
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCreate(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCreate(<any>response_);
+                } catch (e) {
+                    return <Observable<number>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<number>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processCreate(response: HttpResponseBase): Observable<number> {
+        const status = response.status;
+        const responseBlob = 
+            response instanceof HttpResponse ? response.body : 
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }};
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = resultData200 !== undefined ? resultData200 : <any>null;
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<number>(<any>null);
+    }
+
+    get(): Observable<DoctorsVm> {
+        let url_ = this.baseUrl + "/api/Doctors";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",			
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGet(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGet(<any>response_);
+                } catch (e) {
+                    return <Observable<DoctorsVm>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<DoctorsVm>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processGet(response: HttpResponseBase): Observable<DoctorsVm> {
+        const status = response.status;
+        const responseBlob = 
+            response instanceof HttpResponse ? response.body : 
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }};
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = DoctorsVm.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<DoctorsVm>(<any>null);
+    }
+}
+
 export interface IPatientsClient {
     create(command: CreatePatientCommand): Observable<number>;
     get(): Observable<PatientsVm>;
@@ -703,6 +822,150 @@ export class WeatherForecastClient implements IWeatherForecastClient {
         }
         return _observableOf<WeatherForecast[]>(<any>null);
     }
+}
+
+export class CreateDoctorCommand implements ICreateDoctorCommand {
+    firstName?: string | undefined;
+    lastName?: string | undefined;
+    address?: string | undefined;
+    notes?: string | undefined;
+
+    constructor(data?: ICreateDoctorCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.firstName = _data["firstName"];
+            this.lastName = _data["lastName"];
+            this.address = _data["address"];
+            this.notes = _data["notes"];
+        }
+    }
+
+    static fromJS(data: any): CreateDoctorCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateDoctorCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["firstName"] = this.firstName;
+        data["lastName"] = this.lastName;
+        data["address"] = this.address;
+        data["notes"] = this.notes;
+        return data; 
+    }
+}
+
+export interface ICreateDoctorCommand {
+    firstName?: string | undefined;
+    lastName?: string | undefined;
+    address?: string | undefined;
+    notes?: string | undefined;
+}
+
+export class DoctorsVm implements IDoctorsVm {
+    doctorsList?: DoctorDto[] | undefined;
+
+    constructor(data?: IDoctorsVm) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["doctorsList"])) {
+                this.doctorsList = [] as any;
+                for (let item of _data["doctorsList"])
+                    this.doctorsList!.push(DoctorDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): DoctorsVm {
+        data = typeof data === 'object' ? data : {};
+        let result = new DoctorsVm();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.doctorsList)) {
+            data["doctorsList"] = [];
+            for (let item of this.doctorsList)
+                data["doctorsList"].push(item.toJSON());
+        }
+        return data; 
+    }
+}
+
+export interface IDoctorsVm {
+    doctorsList?: DoctorDto[] | undefined;
+}
+
+export class DoctorDto implements IDoctorDto {
+    id?: number;
+    firstName?: string | undefined;
+    lastName?: string | undefined;
+    address?: string | undefined;
+    notes?: string | undefined;
+
+    constructor(data?: IDoctorDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.firstName = _data["firstName"];
+            this.lastName = _data["lastName"];
+            this.address = _data["address"];
+            this.notes = _data["notes"];
+        }
+    }
+
+    static fromJS(data: any): DoctorDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new DoctorDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["firstName"] = this.firstName;
+        data["lastName"] = this.lastName;
+        data["address"] = this.address;
+        data["notes"] = this.notes;
+        return data; 
+    }
+}
+
+export interface IDoctorDto {
+    id?: number;
+    firstName?: string | undefined;
+    lastName?: string | undefined;
+    address?: string | undefined;
+    notes?: string | undefined;
 }
 
 export class CreatePatientCommand implements ICreatePatientCommand {

@@ -34,6 +34,8 @@ namespace MedTechApp.Infrastructure.Persistence
 
         public DbSet<Patient> Patients { get; set; }
 
+        public DbSet<Doctor> Doctors { get; set; }
+
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {
             foreach (var entry in ChangeTracker.Entries<AuditableEntity>())

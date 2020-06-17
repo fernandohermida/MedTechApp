@@ -13,6 +13,8 @@ namespace MedTechApp.Application.Common.Interfaces
 
         DbSet<Patient> Patients { get; set; }
 
+        DbSet<Doctor> Doctors { get; set; }
+
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
     }
 }

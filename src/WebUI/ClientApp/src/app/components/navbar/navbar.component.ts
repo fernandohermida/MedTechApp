@@ -12,6 +12,8 @@ import { NavMenuItem } from 'src/app/models/models';
 export class NavbarComponent {
   menu = [
     { Label: 'Dashboard', Target: '/dashboard' },
+    { Label: 'Patients', Target: '/patients' },
+    { Label: 'Doctors', Target: '/doctors' },
     { Label: 'Table', Target: '/table' },
     { Label: 'Counter', Target: '/counter' },
     { Label: 'Fetch data', Target: '/fetch-data' },
