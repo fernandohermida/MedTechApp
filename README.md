@@ -1,6 +1,5 @@
-# Geodesics 
-This is a solution calculate the distance between 2 coordinates points. 
-We use ASP.NET Core following the principles of Clean Architecture with CQRS and SOLID. 
+# MedTechApp
+This is a solution template for creating a Single Page App (SPA) with Angular and ASP.NET Core following the principles of Clean Architecture and SOLID. 
  
 ## Technologies
 * .NET Core 3.1
@@ -14,12 +13,21 @@ We use ASP.NET Core following the principles of Clean Architecture with CQRS and
 * NUnit, FluentAssertions, Moq & Respawn
 
 ## Getting Started
-The easiest way to get started is 
+The easiest way to get started is to install the NuGet package and run dotnet new ca-sln:
 
-1. Be sure to have  the latest .NET Core SDK
-2. Clone Solution
-3. Build Project
-4. Navigate to src/WebUI and run dotnet run to launch the project
+1. Install the latest .NET Core SDK
+2. Install the latest Node.js LTS
+3. Navigate to src/WebUI and run dotnet run to launch the project
+
+## Database Migrations
+To use dotnet-ef for your migrations please add the following flags to your command (values assume you are executing from repository root)
+
+--project src/Infrastructure (optional if in this folder)
+--startup-project src/WebUI
+--output-dir Persistence/Migrations
+For example, to add a new migration from the root folder:
+
+dotnet ef migrations add "SampleMigration" --project src\Infrastructure --startup-project src\WebUI --output-dir Persistence\Migrations
 
 ## Overview
 ### Domain
